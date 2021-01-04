@@ -1,4 +1,11 @@
-.generate_feature_table <- function(repository_folder){
+#' gen_feature_table
+#'
+#' @param repository_folder
+#'
+#' @return feature_table
+#' @export
+
+gen_feature_table <- function(repository_folder){
 
   data_clinical_sample <- fread(
     file.path(repository_folder, "extdata/data_clinical_sample.txt"),
@@ -216,6 +223,6 @@ generate_feature_table <- function(arg_line = NA){
   feature_table_filename <- raw_args[[1]]
   raw_args <- raw_args[-1]
 
-  feature_table <- .generate_feature_table(repository_folder = repository_folder)
+  feature_table <- gen_feature_table(repository_folder = repository_folder)
   write.table(feature_table, feature_table_filename)
 }
