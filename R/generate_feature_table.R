@@ -58,7 +58,7 @@
 
   ##unzip msk_impact_2017.zip data
   system(paste0("unzip ", file.path(repository_folder, "example_data/msk_impact_2017.zip")))
-  sigs <- fread(file.path(repository_folder, "example_data/msk_impact_2017/msk_impact_2017_data_mutations_uniprot.30sigs.txt"))
+  sigs <- fread("msk_impact_2017/msk_impact_2017_data_mutations_uniprot.30sigs.txt")
   colnames(sigs)[1] <- "SAMPLE_ID"
   sigsm <- data.table::melt.data.table(sigs, id.vars = c("SAMPLE_ID", "Number of Mutations"))
 
@@ -216,5 +216,5 @@ generate_feature_table <- function(arg_line = NA){
   raw_args <- raw_args[-1]
 
   feature_table <- .generate_feature_table(repository_folder = repository_folder)
-  write.tab(feature_table, feature_table_filename)
+  write.table(feature_table, feature_table_filename)
 }
