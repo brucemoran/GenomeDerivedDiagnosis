@@ -121,13 +121,12 @@ gen_feature_table <- function(repository_folder){
   SV <- readRDS(file.path(repository_folder, "extdata/data_fusions.rds"))
   maf <- readRDS(file.path(repository_folder,"extdata/data_mutations_uniprot.rds"))
   seg <- readRDS(file.path(repository_folder,"extdata/msk_impact_2017_data_cna_hg19_seg.rds"))
-  colnames(seg)[1] <- "SAMPLE_ID"
-  
+
   ## purity
   maf[, t_depth := t_alt_count + t_ref_count]
   maf[, t_var_freq := t_alt_count / t_depth]
   max_vaf <- maf[, .(max_vaf = max(t_var_freq)), keyby = .(SAMPLE_ID = Tumor_Sample_Barcode)]
-  max_logr <- seg[, .(max_logr = max(abs(seg.mean[num.mark >= 100]))), keyby = .(SAMPLE_ID = SAMPLE_ID)]
+  max_logr <- seg[, .(max_logr = max(abs(seg.mean[num.mark >= 100]))), keyby = .(SAMPLE_ID = ID)]
   purity_est <- merge(max_vaf, max_logr, all = T)
   feature_table <- merge(feature_table, purity_est, by = "SAMPLE_ID", all.x = T)
   feature_table[is.na(max_logr) | is.infinite(max_logr), max_logr := 0]
