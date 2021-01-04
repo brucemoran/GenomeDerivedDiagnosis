@@ -3,6 +3,7 @@
 export(broad_cn)
 export(cn_burden)
 export(focal_cn_portal)
+export(gen_feature_table)
 export(generate_feature_table)
 export(hotspots)
 export(mutation_count)
