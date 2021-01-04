@@ -1,4 +1,4 @@
-Package: MolecularDiagnosis
+Package: GenomeDerivedDiagnosis
 Title: Identify Cancer Type using IMPACT Data only
 Version: 1.2.0
 Authors@R: c(
@@ -9,7 +9,7 @@ Authors@R: c(
 Description: This package applies machine learning to mutations and copy number
     from the MSK Clinical Series and public data (TCGA/ICGC) in order to help
     identify the cancer subtype of new cases.
-biocViews: 
+biocViews:
 Depends:
     R (>= 3.1.0)
 Imports:
@@ -21,10 +21,10 @@ Imports:
     e1071,
     randomForest,
     glmnet,
-    rfFC, 
-    readxl, 
-    ModelMetrics, 
-    MLmetrics, 
+    rfFC,
+    readxl,
+    ModelMetrics,
+    MLmetrics,
     testthat,
     plyr,
     binom,
