@@ -120,7 +120,7 @@ gen_feature_table <- function(repository_folder){
   cn <- readRDS(file.path(repository_folder, "extdata/data_CNA.rds"))
   SV <- readRDS(file.path(repository_folder, "extdata/data_fusions.rds"))
   maf <- readRDS(file.path(repository_folder,"extdata/data_mutations_uniprot.rds"))
-
+  seg <- readRDS(file.path(repository_folder,"extdata/msk_impact_2017_data_cna_hg19_seg.rds"))
 
   ## purity
   maf[, t_depth := t_alt_count + t_ref_count]
