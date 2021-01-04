@@ -9,6 +9,9 @@ predict_new(arg_line = NA)
 \arguments{
 \item{arg_line}{}
 }
+\value{
+
+}
 \description{
 Predict new samples
 }

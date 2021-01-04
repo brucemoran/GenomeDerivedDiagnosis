@@ -7,7 +7,19 @@
 train_classifier(arg_line = NA)
 }
 \arguments{
-\item{processes}{}
+\item{feature_table}{ft}
+
+\item{model}{model}
+
+\item{tuneGrid}{tunegrid}
+
+\item{tuneGrid_iter}{iterations}
+
+\item{verbose}{verbose}
+
+\item{seed}{seed}
+
+\item{processes}{processes}
 }
 \description{
 

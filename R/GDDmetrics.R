@@ -1,8 +1,8 @@
-#' Title
+#' GDD metrics
 #'
-#' @param data
-#' @param lev
-#' @param model
+#' @param data input data
+#' @param lev input leve
+#' @param model input model
 #'
 #' @return
 GDDmetrics <- function (data, lev = NULL, model = NULL){

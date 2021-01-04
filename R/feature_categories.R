@@ -1141,7 +1141,7 @@ focal_cn_portal = function(cna) {
 #'
 #' Broad copy number alterations
 #'
-#' @param seg
+#' @param seg segments
 #' @param log_ratio_threshold
 #'
 #' @return binary table of broad copy number alterations in the 341 IMPACT gene panel
@@ -1668,7 +1668,7 @@ mutation_count <- function(maf) {
 #'
 #' Copy number burden
 #'
-#' @param seg
+#' @param seg segments
 #' @param log_ratio_threshold
 #'
 #' @return copy number burden of samples from selected cancer types

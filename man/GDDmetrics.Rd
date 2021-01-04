@@ -2,13 +2,20 @@
 % Please edit documentation in R/GDDmetrics.R
 \name{GDDmetrics}
 \alias{GDDmetrics}
-\title{Title}
+\title{GDD metrics}
 \usage{
 GDDmetrics(data, lev = NULL, model = NULL)
 }
 \arguments{
-\item{model}{}
+\item{data}{input data}
+
+\item{lev}{input leve}
+
+\item{model}{input model}
+}
+\value{
+
 }
 \description{
-Title
+GDD metrics
 }

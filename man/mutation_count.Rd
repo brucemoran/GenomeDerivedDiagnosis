@@ -4,10 +4,10 @@
 \alias{mutation_count}
 \title{something}
 \usage{
-mutation_count(maf = maf)
+mutation_count(maf)
 }
 \arguments{
-\item{maf}{}
+\item{maf}{MAF format file}
 }
 \value{
 table of mutation counts in the 341 IMPACT gene panel

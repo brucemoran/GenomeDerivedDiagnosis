@@ -4,7 +4,7 @@
 \alias{focal_cn_portal}
 \title{something}
 \usage{
-focal_cn_portal(cna = cn)
+focal_cn_portal(cna)
 }
 \arguments{
 \item{cna}{}

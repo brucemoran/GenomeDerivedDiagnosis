@@ -4,10 +4,10 @@
 \alias{hotspots}
 \title{something}
 \usage{
-hotspots(maf = maf)
+hotspots(maf)
 }
 \arguments{
-\item{maf}{}
+\item{maf}{MAF format file}
 }
 \value{
 binary table of hotpots in the 341 IMPACT gene panel

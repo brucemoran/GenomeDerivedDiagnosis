@@ -4,10 +4,10 @@
 \alias{mutations}
 \title{something}
 \usage{
-mutations(maf = maf)
+mutations(maf)
 }
 \arguments{
-\item{maf}{}
+\item{maf}{MAF format file}
 }
 \value{
 binary table of mutations in the 341 IMPACT gene panel

@@ -103,13 +103,13 @@
 #' @title train_classifier
 #' @description
 #'
-#' @param feature_table
-#' @param model
-#' @param tuneGrid
-#' @param tuneGrid_iter
-#' @param verbose
-#' @param seed
-#' @param processes
+#' @param feature_table ft
+#' @param model model
+#' @param tuneGrid tunegrid
+#' @param tuneGrid_iter iterations
+#' @param verbose verbose
+#' @param seed seed
+#' @param processes processes
 #'
 #' @export
 train_classifier <- function(arg_line = NA){

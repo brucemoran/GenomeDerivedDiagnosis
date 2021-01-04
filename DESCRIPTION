@@ -35,5 +35,5 @@ Suggests:
 Remotes: github::rforge/rffc/pkg
 License: GPL-3
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Encoding: UTF-8

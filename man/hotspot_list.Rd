@@ -4,12 +4,14 @@
 \name{hotspot_list}
 \alias{hotspot_list}
 \title{Hotspots - MSK-IMPACT 341}
-\format{An object of class \code{character} of length 3746.}
+\format{
+An object of class \code{character} of length 3746.
+}
 \usage{
 hotspot_list
 }
 \arguments{
-\item{maf}{}
+\item{maf}{MAF format file}
 }
 \value{
 binary table of hotpots in the 341 IMPACT gene panel

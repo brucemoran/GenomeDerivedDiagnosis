@@ -4,10 +4,10 @@
 \alias{truncating_mutations}
 \title{something}
 \usage{
-truncating_mutations(maf = maf)
+truncating_mutations(maf)
 }
 \arguments{
-\item{maf}{}
+\item{maf}{MAF format file}
 }
 \value{
 binary table of truncating mutations in the 341 IMPACT gene panel

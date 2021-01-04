@@ -7,6 +7,8 @@
 cn_burden(seg = seg, log_ratio_threshold = 0.2)
 }
 \arguments{
+\item{seg}{segments}
+
 \item{log_ratio_threshold}{}
 }
 \value{
