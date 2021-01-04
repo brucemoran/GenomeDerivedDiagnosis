@@ -15,7 +15,7 @@
   ### get supplementary info
   supplement_file_tmp <- tempfile()
   download.file(
-    "https://media.nature.com/original/nature-assets/nm/journal/v23/n6/extref/nm.4333-S2.xlsx",
+    "https://drive.google.com/uc?export=download&id=1IoNc51HarYMmT80ITnmKfqqzs4VSZQI0",
     destfile = supplement_file_tmp,
     quiet = TRUE
   )
