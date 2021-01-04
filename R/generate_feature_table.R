@@ -15,7 +15,7 @@
   ### get supplementary info
   supplement_file_tmp <- tempfile()
   download.file(
-    "https://drive.google.com/uc?export=download&id=1IoNc51HarYMmT80ITnmKfqqzs4VSZQI0",
+    "https://static-content.springer.com/esm/art%3A10.1038%2Fnm.4333/MediaObjects/41591_2017_BFnm4333_MOESM22_ESM.xlsx",
     destfile = supplement_file_tmp,
     quiet = TRUE
   )
