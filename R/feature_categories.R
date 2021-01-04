@@ -12,25 +12,26 @@ tdt <- function (inpdt){
 #'
 #' Mutations - MSK-IMPACT 341
 #'
-#' @param maf
+#' @param maf MAF format file
 #'
 #' @return binary table of mutations in the 341 IMPACT gene panel
-mutations = function(maf = maf){
 
-  Nonsyn_Consequences = c("missense_variant", "stop_gained", "frameshift_variant", "splice_donor_variant",
+mutations <- function(maf){
+
+  Nonsyn_Consequences <- c("missense_variant", "stop_gained", "frameshift_variant", "splice_donor_variant",
       "splice_acceptor_variant", "inframe_insertion", "inframe_deletion",
       "stop_lost", "exon_loss_variant", "disruptive_inframe_deletion",
       "disruptive_inframe_insertion", "start_lost")
 
-  maf = as.data.table(maf)
+  maf1 <- data.table::as.data.table(maf)
 
-  if("Tumor_Sample_Barcode" %in% names(maf)){
-      setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
+  if("Tumor_Sample_Barcode" %in% names(maf1)){
+      setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
   }
-  setkey(maf, "SAMPLE_ID")
+  setkey(maf1, "SAMPLE_ID")
 
-  mutations_d = dcast.data.table(
-      maf[ Consequence %like% paste(collapse = "|", Nonsyn_Consequences) & Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
+  mutations_d <- data.table::dcast.data.table(
+      maf1[ Consequence %like% paste(collapse = "|", Nonsyn_Consequences) & Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
       SAMPLE_ID ~ Hugo_Symbol,
       value.var = 'SAMPLE_ID',
       fun.aggregate = function(x) {
@@ -38,27 +39,24 @@ mutations = function(maf = maf){
       }
   )
 
+  mutations_d <- data.table::as.data.table(mutations_d)
 
-  mutations_d = as.data.table(mutations_d)
-
-  unmutated_impact_genes = setdiff(MolecularDiagnosis::msk_impact_341, colnames(mutations_d))
+  unmutated_impact_genes <- setdiff(MolecularDiagnosis::msk_impact_341, colnames(mutations_d))
 
   suppressWarnings(mutations_d[, unmutated_impact_genes := 0, with = F])
 
   # add TERT promoter as an additional feature
-  mutations_d[SAMPLE_ID %in% maf[Consequence == "upstream_gene_variant" &
+  mutations_d[SAMPLE_ID %in% maf1[Consequence == "upstream_gene_variant" &
                                    Hugo_Symbol == "TERT"]$SAMPLE_ID, TERTp := 1]
-  mutations_d[!SAMPLE_ID %in% maf[Consequence == "upstream_gene_variant" &
+  mutations_d[!SAMPLE_ID %in% maf1[Consequence == "upstream_gene_variant" &
                                     Hugo_Symbol == "TERT"]$SAMPLE_ID, TERTp := 0]
   setcolorder(mutations_d, c("SAMPLE_ID", sort(MolecularDiagnosis::msk_impact_341), "TERTp"))
 
-  if("Tumor_Sample_Barcode" %in% names(maf)){
-      setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
+  if("Tumor_Sample_Barcode" %in% names(maf1)){
+      setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
   }
   copy(mutations_d)
-
 }
-
 
 #' @name truncating_mutations
 #' @title something
@@ -66,24 +64,27 @@ mutations = function(maf = maf){
 #'
 #' Truncating mutations - MSK-IMPACT341
 #'
-#' @param maf
+#' @param maf MAF format file
 #'
 #' @return binary table of truncating mutations in the 341 IMPACT gene panel
-truncating_mutations = function(maf = maf) {
 
-  if("Tumor_Sample_Barcode" %in% names(maf)){
-      setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
+truncating_mutations <- function(maf) {
+
+  maf1 <- data.table::as.data.table(maf)
+
+  if("Tumor_Sample_Barcode" %in% names(maf1)){
+      setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
   }
 
-  setkey(maf, "SAMPLE_ID")
+  setkey(maf1, "SAMPLE_ID")
 
-  if("Consequence" %in% names(maf)) {
+  if("Consequence" %in% names(maf1)) {
 
     trunc <- c("stop_gained", "frameshift_variant", "splice_donor_variant",
                "splice_acceptor_variant", "stop_lost", "exon_loss_variant")
 
-    mutations_d <- dcast.data.table(
-      maf[Consequence %like% paste(collapse = "|", trunc) &
+    mutations_d <- data.table::dcast.data.table(
+      maf1[Consequence %like% paste(collapse = "|", trunc) &
             Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
       SAMPLE_ID ~ paste0(Hugo_Symbol, "_", "TRUNC"),
       value.var = 'SAMPLE_ID',
@@ -97,8 +98,8 @@ truncating_mutations = function(maf = maf) {
       trunc <- c("Frame_Shift_Del", "Splice_Site", "Frame_Shift_Ins",
                "Nonsense_Mutation", "Nonstop_Mutation")
 
-      mutations_d <- dcast.data.table(
-          maf[ Variant_Classification %like% paste(collapse = "|", trunc) & Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
+      mutations_d <- data.table::dcast.data.table(
+          maf1[ Variant_Classification %like% paste(collapse = "|", trunc) & Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
         SAMPLE_ID ~ paste0(Hugo_Symbol, "_", "TRUNC"),
         value.var = 'SAMPLE_ID',
         fun.aggregate = function(x) {
@@ -108,7 +109,7 @@ truncating_mutations = function(maf = maf) {
 
     }
 
-  mutations_d <- as.data.table(mutations_d)
+  mutations_d <- data.table::as.data.table(mutations_d)
 
   unmutated_impact_genes <- setdiff(paste0(MolecularDiagnosis::msk_impact_341, "_", "TRUNC"), colnames(mutations_d))
 
@@ -118,18 +119,19 @@ truncating_mutations = function(maf = maf) {
       sort(MolecularDiagnosis::msk_impact_341), "_", "TRUNC"
   )))
 
-  if("Tumor_Sample_Barcode" %in% names(maf)) setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
+  if("Tumor_Sample_Barcode" %in% names(maf1)) setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
   copy(mutations_d)
 
 }
 
 #' Hotspots - MSK-IMPACT 341
 #'
-#' @param maf
+#' @param maf MAF format file
 #'
 #' @return binary table of hotpots in the 341 IMPACT gene panel
 #'
 #' @export hotspots
+
 hotspot_list <- c("ABCC10 R570L", "ABCC10 R570Q", "ABCC10 R570W", "ACADS R330C",
   "ACADS R330H", "ACP6 V29G", "ACSBG2 I250M", "ACVR1 G328E", "ACVR1 G328V",
   "ACVR1 R206H", "ACVR1 R258G", "ACVR1 R258M", "ACVR1B R485*",
@@ -980,18 +982,17 @@ hotspot_list <- c("ABCC10 R570L", "ABCC10 R570Q", "ABCC10 R570W", "ACADS R330C",
   "ZNF649 R198K", "ZNF649 R198S")
 
 
-
 #' @name hotspots
 #' @title something
 #' @description
 #'
 #' Hotspots - MSK-IMPACT 341
 #'
-#' @param maf
+#' @param maf MAF format file
 #'
 #' @return binary table of hotpots in the 341 IMPACT gene panel
 #' @export
-hotspots <- function( maf = maf ){
+hotspots <- function(maf){
 
   if("Tumor_Sample_Barcode" %in% names(maf)){
       setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
@@ -1101,7 +1102,7 @@ hotspots <- function( maf = maf ){
 #' @return binary table of focal copy number alterations in the 341 IMPACT gene panel
 #'
 #' @export
-focal_cn_portal = function( cna = cn ) {
+focal_cn_portal = function(cna) {
 
   setnames(cna, 1, "Hugo_Symbol")
   # cna[ Hugo_Symbol ==  "FAM123B", Hugo_Symbol := "AMER1"]
@@ -1134,9 +1135,6 @@ focal_cn_portal = function( cna = cn ) {
   return(cna)
 }
 
-
-
-
 #' @name broad_cn
 #' @title something
 #' @description
@@ -1149,7 +1147,7 @@ focal_cn_portal = function( cna = cn ) {
 #' @return binary table of broad copy number alterations in the 341 IMPACT gene panel
 #'
 #' @export
-broad_cn = function(seg = seg, log_ratio_threshold = 0.2){
+broad_cn <- function(seg, log_ratio_threshold = 0.2){
 
   setnames(seg,
            c(
@@ -1275,8 +1273,6 @@ broad_cn = function(seg = seg, log_ratio_threshold = 0.2){
 
 }
 
-
-
 #' @name fusions
 #' @title something
 #' @description
@@ -1286,7 +1282,7 @@ broad_cn = function(seg = seg, log_ratio_threshold = 0.2){
 #' @param SV
 #'
 #' @return binary table of structural variants involving genes in the 341 IMPACT gene panel
-fusions = function(SV = SV){
+fusions <- function(SV = SV){
   if("Tumor_Sample_Barcode" %in% names(SV)) setnames(SV, "Tumor_Sample_Barcode", "SAMPLE_ID")
   SV[, fusion_column_name :=
        ifelse(Fusion %in% c("TMPRSS2-ERG fusion", "ETV1-TMPRSS2 fusion"), "ETS_TMPRSS2_fusion",
@@ -1306,336 +1302,331 @@ fusions = function(SV = SV){
   return(SV_tab)
 }
 
-
-
-
-
-
-#' #' @name mutational_signatures
-#' #' @title something
-#' #' @description
-#' #'
-#' #' Mutational signatures
-#' #'
-#' #' @param maf
-#' #'
-#' ## #' @import Biostrings
-#' ## #' @import GenomeInfoDb
-#' ## #' @import BSgenome.Hsapiens.UCSC.hg19
-#' #' @return binary table of mutational signatures in the 341 IMPACT gene panel
-#' ## #' @export
-#' mutational_signatures <- function( maf = maf){
-#'
-#'   maf <- as.data.table(maf)
-#'
-#'   if("Tumor_Sample_Barcode" %in% names(maf)) setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
-#'
-#'   setkey(maf, "SAMPLE_ID")
-#'
-#'   dt <- maf
-#'   flank <- 1
-#'   hg19 <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
-#'   GenomeInfoDb::seqlevelsStyle(hg19) <- "NCBI"
-#'
-#'   if(!"Mut_Tri" %in% colnames(maf)) {
-#'     ### annotate_maf_with_tri_nucleotide
-#'     ### data.table not working when in separate function (?)
-#'     Ref_Tri <- dt[, Biostrings::getSeq(hg19,
-#'                                        name = Chromosome,
-#'                                        start = Start_Position - flank,
-#'                                        end = End_Position + flank)]
-#'     #  with(dt, ifelse()
-#'     Ref_Tri_CT <- Ref_Tri
-#'     Ref_Tri_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")] <-
-#'       Biostrings::reverseComplement(Ref_Tri_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")])
-#'     Ref_Tri <- as.character(Ref_Tri)
-#'     Ref_Tri_CT <- as.character(Ref_Tri_CT)
-#'     Ref_Tri_CT[dt$Variant_Type != "SNP"] <- NA
-#'
-#'     Tumor_Seq_Allele2_CT <- dt$Tumor_Seq_Allele2
-#'     Tumor_Seq_Allele2_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")] <-
-#'       as.character(Biostrings::reverseComplement(
-#'         Biostrings::DNAStringSet(Tumor_Seq_Allele2_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")])))
-#'
-#'     ### remove synonymous mutations
-#'     Ref_Tri_CT[substr(Ref_Tri_CT, 2, 2) == Tumor_Seq_Allele2_CT] <-
-#'       NA
-#'     ### remove positions with no identified reference (ie MT)
-#'     Ref_Tri_CT[substr(Ref_Tri_CT, 2, 2) == "N"] <- NA
-#'
-#'     Mut_Tri <- with(dt,
-#'                     ifelse(
-#'                       Variant_Type != "SNP" | is.na(Ref_Tri_CT) ,
-#'                       NA,
-#'                       paste0(
-#'                         substr(Ref_Tri_CT, 1, 1),
-#'                         "[",
-#'                         substr(Ref_Tri_CT, 2, 2),
-#'                         "/",
-#'                         Tumor_Seq_Allele2_CT,
-#'                         "]",
-#'                         substr(Ref_Tri_CT, 3, 3)
-#'                       )
-#'                     ))
-#'
-#'     dt[, Ref_Tri := Ref_Tri]  # dt specific, add column
-#'     dt[, Mut_Tri := Mut_Tri]  # dt specific, add column
-#'     ###
-#'     maf <- dt
-#'   }
-#'   maf <- maf[!Mut_Tri %like% "^N"]
-#'
-#'   trinuc_counts <- dcast.data.table(maf[!is.na(Mut_Tri),
-#'                                         .N,
-#'                                         by = list(name = Tumor_Sample_Barcode,
-#'                                                   Mut_Tri)],
-#'                                     name ~ Mut_Tri,
-#'                                     value.var = "N",
-#'                                     fill = 0)
-#'
-#'   trinuc_counts_norm_to_one <- with(trinuc_counts,
-#'                                     data.table(
-#'                                       name = name,
-#'                                       number = rowSums(trinuc_counts[, -1, with = FALSE]),
-#'                                       trinuc_counts[, -1, with = FALSE] / rowSums(trinuc_counts[, -1, with =
-#'                                                                                                   FALSE])
-#'                                     ))
-#'   setnames(trinuc_counts_norm_to_one, gsub("[^[:alnum:] ]", "", names(trinuc_counts_norm_to_one)))
-#'
-#'   adam_trinuc_colnames = c(
-#'       "name",
-#'       "number",
-#'       "ACAA",
-#'       "ACAC",
-#'       "ACAG",
-#'       "ACAT",
-#'       "CCAA",
-#'       "CCAC",
-#'       "CCAG",
-#'       "CCAT",
-#'       "GCAA",
-#'       "GCAC",
-#'       "GCAG",
-#'       "GCAT",
-#'       "TCAA",
-#'       "TCAC",
-#'       "TCAG",
-#'       "TCAT",
-#'       "ACGA",
-#'       "ACGC",
-#'       "ACGG",
-#'       "ACGT",
-#'       "CCGA",
-#'       "CCGC",
-#'       "CCGG",
-#'       "CCGT",
-#'       "GCGA",
-#'       "GCGC",
-#'       "GCGG",
-#'       "GCGT",
-#'       "TCGA",
-#'       "TCGC",
-#'       "TCGG",
-#'       "TCGT",
-#'       "ACTA",
-#'       "ACTC",
-#'       "ACTG",
-#'       "ACTT",
-#'       "CCTA",
-#'       "CCTC",
-#'       "CCTG",
-#'       "CCTT",
-#'       "GCTA",
-#'       "GCTC",
-#'       "GCTG",
-#'       "GCTT",
-#'       "TCTA",
-#'       "TCTC",
-#'       "TCTG",
-#'       "TCTT",
-#'       "ATAA",
-#'       "ATAC",
-#'       "ATAG",
-#'       "ATAT",
-#'       "CTAA",
-#'       "CTAC",
-#'       "CTAG",
-#'       "CTAT",
-#'       "GTAA",
-#'       "GTAC",
-#'       "GTAG",
-#'       "GTAT",
-#'       "TTAA",
-#'       "TTAC",
-#'       "TTAG",
-#'       "TTAT",
-#'       "ATCA",
-#'       "ATCC",
-#'       "ATCG",
-#'       "ATCT",
-#'       "CTCA",
-#'       "CTCC",
-#'       "CTCG",
-#'       "CTCT",
-#'       "GTCA",
-#'       "GTCC",
-#'       "GTCG",
-#'       "GTCT",
-#'       "TTCA",
-#'       "TTCC",
-#'       "TTCG",
-#'       "TTCT",
-#'       "ATGA",
-#'       "ATGC",
-#'       "ATGG",
-#'       "ATGT",
-#'       "CTGA",
-#'       "CTGC",
-#'       "CTGG",
-#'       "CTGT",
-#'       "GTGA",
-#'       "GTGC",
-#'       "GTGG",
-#'       "GTGT",
-#'       "TTGA",
-#'       "TTGC",
-#'       "TTGG",
-#'       "TTGT"
-#'   )
-#'
-#'   new_names = setdiff(adam_trinuc_colnames, names(trinuc_counts_norm_to_one))
-#'   suppressWarnings(trinuc_counts_norm_to_one[, new_names := 0, with = F])
-#'   trinuc_counts_norm_to_one <- trinuc_counts_norm_to_one[, adam_trinuc_colnames, with = F]
-#'   setcolorder(trinuc_counts_norm_to_one, adam_trinuc_colnames)
-#'
-#'   signature_fractions = stratton_signatures_summ(trinuc_counts_norm_to_one)
-#'
-#'   col_names = c(
-#'       "Signature.1 (age)",
-#'       "Signature.2 (APOBEC)",
-#'       "Signature.3 (BRCA1/2)",
-#'       "Signature.4 (smoking)",
-#'       "Signature.5",
-#'       "Signature.6 (DNA mismatch repair)",
-#'       "Signature.7 (ultraviolet light)",
-#'       "Signature.8",
-#'       "Signature.9 (POLH)",
-#'       "Signature.10 (POLE)",
-#'       "Signature.11 (temozolomide)",
-#'       "Signature.12",
-#'       "Signature.13 (APOBEC)",
-#'       "Signature.14",
-#'       "Signature.15 (DNA mismatch repair)",
-#'       "Signature.16",
-#'       "Signature.17",
-#'       "Signature.18",
-#'       "Signature.19",
-#'       "Signature.20 (DNA mismatch repair?)",
-#'       "Signature.21",
-#'       "Signature.22 (aristolochic acid)",
-#'       "Signature.23",
-#'       "Signature.24 (aflatoxin)",
-#'       "Signature.25",
-#'       "Signature.26",
-#'       "Signature.27",
-#'       "Signature.28",
-#'       "Signature.29 (tobacco chewing)",
-#'       "Signature.30"
-#'     )
-#'
-#'   if(!nrow(signature_fractions)) {
-#'     signature_fractions <- trinuc_counts_norm_to_one[, list(name)]
-#'     signature_fractions[, (col_names) := 0]
-#'   }
-#'
-#'   setnames(signature_fractions, "name", "SAMPLE_ID")
-#'
-#'   nMut <- maf[, .N, by = "SAMPLE_ID"]
-#'   nMut <- nMut[order(N)]
-#'   # nMut[N < 10, signature_fraction_threshold := 1]
-#'   # nMut[N >= 10 & N < 50, signature_fraction_threshold := 0.3]
-#'   # nMut[N >= 50 & N < 100, signature_fraction_threshold := 0.2]
-#'   # nMut[N >= 100 & N < 200, signature_fraction_threshold := 0.15]
-#'   # nMut[N >= 200, signature_fraction_threshold := 0.1]
-#'   nMut[, signature_fraction_threshold := 0.4]
-#'   signature_fractions <- merge(signature_fractions, nMut,
-#'                                by = "SAMPLE_ID")
-#'
-#'   ### create boolean for signatures based on threshold
-#'   for(i in 1:nrow(signature_fractions)) {
-#'     for(j in 2:(ncol(signature_fractions) - 2)) {
-#'       set(
-#'         signature_fractions,
-#'         i,
-#'         j,
-#'         as.integer(
-#'           signature_fractions[i, j, with = F] > signature_fractions[i]$signature_fraction_threshold
-#'         )
-#'       )
-#'     }
-#'   }
-#'
-#'   signature_fractions <-
-#'     signature_fractions[,!c("N", "signature_fraction_threshold"), with = F]
-#'
-#'   setkey(signature_fractions, SAMPLE_ID)
-#'
-#'   setnames(signature_fractions,
-#'            names(signature_fractions),
-#'            gsub("\\(|\\)|\\?", "", names(signature_fractions)))
-#'   setnames(signature_fractions,
-#'            names(signature_fractions),
-#'            gsub("\\/|\\ ", ".", names(signature_fractions)))
-#'
-#'   col_names <- names(signature_fractions)
-#'   col_names <- col_names[-1]
-#'
-#'   setcolorder(signature_fractions, c("SAMPLE_ID", col_names))
-#'
-#'   signatures = c(
-#'       "Signature.1.age",
-#'       "Signature.2.APOBEC",
-#'       "Signature.3.BRCA1.2",
-#'       "Signature.4.smoking",
-#'       "Signature.5",
-#'       "Signature.6.DNA.mismatch.repair",
-#'       "Signature.7.ultraviolet.light",
-#'       "Signature.8",
-#'       "Signature.9.POLH",
-#'       "Signature.10.POLE",
-#'       "Signature.11.temozolomide",
-#'       "Signature.12",
-#'       "Signature.13.APOBEC",
-#'       "Signature.14",
-#'       "Signature.15.DNA.mismatch.repair",
-#'       "Signature.16",
-#'       "Signature.17",
-#'       "Signature.18",
-#'       "Signature.19",
-#'       "Signature.20.DNA.mismatch.repair",
-#'       "Signature.21",
-#'       "Signature.22.aristolochic.acid",
-#'       "Signature.23",
-#'       "Signature.24.aflatoxin",
-#'       "Signature.25",
-#'       "Signature.26",
-#'       "Signature.27",
-#'       "Signature.28",
-#'       "Signature.29.tobacco.chewing",
-#'       "Signature.30"
-#'     )
-#'
-#'   absent_signatures <- setdiff(signatures,
-#'                                colnames(signature_fractions))
-#'
-#'   suppressWarnings(signature_fractions[, absent_signatures := 0, with =
-#'                                          F])
-#'
-#'   setcolorder(signature_fractions, c("SAMPLE_ID", signatures))
-#'
-#'   return(signature_fractions)
-#'
-#' }
+# ' #' @name mutational_signatures
+# ' #' @title something
+# ' #' @description
+# ' #'
+# ' #' Mutational signatures
+# ' #'
+# ' #' @param maf
+# ' #'
+# ' ## #' @import Biostrings
+# ' ## #' @import GenomeInfoDb
+# ' ## #' @import BSgenome.Hsapiens.UCSC.hg19
+# ' #' @return binary table of mutational signatures in the 341 IMPACT gene panel
+# ' ## #' @export
+# ' mutational_signatures <- function( maf = maf){
+# '
+# '   maf <- as.data.table(maf)
+# '
+# '   if("Tumor_Sample_Barcode" %in% names(maf)) setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
+# '
+# '   setkey(maf, "SAMPLE_ID")
+# '
+# '   dt <- maf
+# '   flank <- 1
+# '   hg19 <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
+# '   GenomeInfoDb::seqlevelsStyle(hg19) <- "NCBI"
+# '
+# '   if(!"Mut_Tri" %in% colnames(maf)) {
+# '     ### annotate_maf_with_tri_nucleotide
+# '     ### data.table not working when in separate function (?)
+# '     Ref_Tri <- dt[, Biostrings::getSeq(hg19,
+# '                                        name = Chromosome,
+# '                                        start = Start_Position - flank,
+# '                                        end = End_Position + flank)]
+# '     #  with(dt, ifelse()
+# '     Ref_Tri_CT <- Ref_Tri
+# '     Ref_Tri_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")] <-
+# '       Biostrings::reverseComplement(Ref_Tri_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")])
+# '     Ref_Tri <- as.character(Ref_Tri)
+# '     Ref_Tri_CT <- as.character(Ref_Tri_CT)
+# '     Ref_Tri_CT[dt$Variant_Type != "SNP"] <- NA
+# '
+# '     Tumor_Seq_Allele2_CT <- dt$Tumor_Seq_Allele2
+# '     Tumor_Seq_Allele2_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")] <-
+# '       as.character(Biostrings::reverseComplement(
+# '         Biostrings::DNAStringSet(Tumor_Seq_Allele2_CT[substr(Ref_Tri, 2, 2) %in% c("A", "G")])))
+# '
+# '     ### remove synonymous mutations
+# '     Ref_Tri_CT[substr(Ref_Tri_CT, 2, 2) == Tumor_Seq_Allele2_CT] <-
+# '       NA
+# '     ### remove positions with no identified reference (ie MT)
+# '     Ref_Tri_CT[substr(Ref_Tri_CT, 2, 2) == "N"] <- NA
+# '
+# '     Mut_Tri <- with(dt,
+# '                     ifelse(
+# '                       Variant_Type != "SNP" | is.na(Ref_Tri_CT) ,
+# '                       NA,
+# '                       paste0(
+# '                         substr(Ref_Tri_CT, 1, 1),
+# '                         "[",
+# '                         substr(Ref_Tri_CT, 2, 2),
+# '                         "/",
+# '                         Tumor_Seq_Allele2_CT,
+# '                         "]",
+# '                         substr(Ref_Tri_CT, 3, 3)
+# '                       )
+# '                     ))
+# '
+# '     dt[, Ref_Tri := Ref_Tri]  # dt specific, add column
+# '     dt[, Mut_Tri := Mut_Tri]  # dt specific, add column
+# '     ###
+# '     maf <- dt
+# '   }
+# '   maf <- maf[!Mut_Tri %like% "^N"]
+# '
+# '   trinuc_counts <- dcast.data.table(maf[!is.na(Mut_Tri),
+# '                                         .N,
+# '                                         by = list(name = Tumor_Sample_Barcode,
+# '                                                   Mut_Tri)],
+# '                                     name ~ Mut_Tri,
+# '                                     value.var = "N",
+# '                                     fill = 0)
+# '
+# '   trinuc_counts_norm_to_one <- with(trinuc_counts,
+# '                                     data.table(
+# '                                       name = name,
+# '                                       number = rowSums(trinuc_counts[, -1, with = FALSE]),
+# '                                       trinuc_counts[, -1, with = FALSE] / rowSums(trinuc_counts[, -1, with =
+# '                                                                                                   FALSE])
+# '                                     ))
+# '   setnames(trinuc_counts_norm_to_one, gsub("[^[:alnum:] ]", "", names(trinuc_counts_norm_to_one)))
+# '
+# '   adam_trinuc_colnames = c(
+# '       "name",
+# '       "number",
+# '       "ACAA",
+# '       "ACAC",
+# '       "ACAG",
+# '       "ACAT",
+# '       "CCAA",
+# '       "CCAC",
+# '       "CCAG",
+# '       "CCAT",
+# '       "GCAA",
+# '       "GCAC",
+# '       "GCAG",
+# '       "GCAT",
+# '       "TCAA",
+# '       "TCAC",
+# '       "TCAG",
+# '       "TCAT",
+# '       "ACGA",
+# '       "ACGC",
+# '       "ACGG",
+# '       "ACGT",
+# '       "CCGA",
+# '       "CCGC",
+# '       "CCGG",
+# '       "CCGT",
+# '       "GCGA",
+# '       "GCGC",
+# '       "GCGG",
+# '       "GCGT",
+# '       "TCGA",
+# '       "TCGC",
+# '       "TCGG",
+# '       "TCGT",
+# '       "ACTA",
+# '       "ACTC",
+# '       "ACTG",
+# '       "ACTT",
+# '       "CCTA",
+# '       "CCTC",
+# '       "CCTG",
+# '       "CCTT",
+# '       "GCTA",
+# '       "GCTC",
+# '       "GCTG",
+# '       "GCTT",
+# '       "TCTA",
+# '       "TCTC",
+# '       "TCTG",
+# '       "TCTT",
+# '       "ATAA",
+# '       "ATAC",
+# '       "ATAG",
+# '       "ATAT",
+# '       "CTAA",
+# '       "CTAC",
+# '       "CTAG",
+# '       "CTAT",
+# '       "GTAA",
+# '       "GTAC",
+# '       "GTAG",
+# '       "GTAT",
+# '       "TTAA",
+# '       "TTAC",
+# '       "TTAG",
+# '       "TTAT",
+# '       "ATCA",
+# '       "ATCC",
+# '       "ATCG",
+# '       "ATCT",
+# '       "CTCA",
+# '       "CTCC",
+# '       "CTCG",
+# '       "CTCT",
+# '       "GTCA",
+# '       "GTCC",
+# '       "GTCG",
+# '       "GTCT",
+# '       "TTCA",
+# '       "TTCC",
+# '       "TTCG",
+# '       "TTCT",
+# '       "ATGA",
+# '       "ATGC",
+# '       "ATGG",
+# '       "ATGT",
+# '       "CTGA",
+# '       "CTGC",
+# '       "CTGG",
+# '       "CTGT",
+# '       "GTGA",
+# '       "GTGC",
+# '       "GTGG",
+# '       "GTGT",
+# '       "TTGA",
+# '       "TTGC",
+# '       "TTGG",
+# '       "TTGT"
+# '   )
+# '
+# '   new_names = setdiff(adam_trinuc_colnames, names(trinuc_counts_norm_to_one))
+# '   suppressWarnings(trinuc_counts_norm_to_one[, new_names := 0, with = F])
+# '   trinuc_counts_norm_to_one <- trinuc_counts_norm_to_one[, adam_trinuc_colnames, with = F]
+# '   setcolorder(trinuc_counts_norm_to_one, adam_trinuc_colnames)
+# '
+# '   signature_fractions = stratton_signatures_summ(trinuc_counts_norm_to_one)
+# '
+# '   col_names = c(
+# '       "Signature.1 (age)",
+# '       "Signature.2 (APOBEC)",
+# '       "Signature.3 (BRCA1/2)",
+# '       "Signature.4 (smoking)",
+# '       "Signature.5",
+# '       "Signature.6 (DNA mismatch repair)",
+# '       "Signature.7 (ultraviolet light)",
+# '       "Signature.8",
+# '       "Signature.9 (POLH)",
+# '       "Signature.10 (POLE)",
+# '       "Signature.11 (temozolomide)",
+# '       "Signature.12",
+# '       "Signature.13 (APOBEC)",
+# '       "Signature.14",
+# '       "Signature.15 (DNA mismatch repair)",
+# '       "Signature.16",
+# '       "Signature.17",
+# '       "Signature.18",
+# '       "Signature.19",
+# '       "Signature.20 (DNA mismatch repair?)",
+# '       "Signature.21",
+# '       "Signature.22 (aristolochic acid)",
+# '       "Signature.23",
+# '       "Signature.24 (aflatoxin)",
+# '       "Signature.25",
+# '       "Signature.26",
+# '       "Signature.27",
+# '       "Signature.28",
+# '       "Signature.29 (tobacco chewing)",
+# '       "Signature.30"
+# '     )
+# '
+# '   if(!nrow(signature_fractions)) {
+# '     signature_fractions <- trinuc_counts_norm_to_one[, list(name)]
+# '     signature_fractions[, (col_names) := 0]
+# '   }
+# '
+# '   setnames(signature_fractions, "name", "SAMPLE_ID")
+# '
+# '   nMut <- maf[, .N, by = "SAMPLE_ID"]
+# '   nMut <- nMut[order(N)]
+# '   # nMut[N < 10, signature_fraction_threshold := 1]
+# '   # nMut[N >= 10 & N < 50, signature_fraction_threshold := 0.3]
+# '   # nMut[N >= 50 & N < 100, signature_fraction_threshold := 0.2]
+# '   # nMut[N >= 100 & N < 200, signature_fraction_threshold := 0.15]
+# '   # nMut[N >= 200, signature_fraction_threshold := 0.1]
+# '   nMut[, signature_fraction_threshold := 0.4]
+# '   signature_fractions <- merge(signature_fractions, nMut,
+# '                                by = "SAMPLE_ID")
+# '
+# '   ### create boolean for signatures based on threshold
+# '   for(i in 1:nrow(signature_fractions)) {
+# '     for(j in 2:(ncol(signature_fractions) - 2)) {
+# '       set(
+# '         signature_fractions,
+# '         i,
+# '         j,
+# '         as.integer(
+# '           signature_fractions[i, j, with = F] > signature_fractions[i]$signature_fraction_threshold
+# '         )
+# '       )
+# '     }
+# '   }
+# '
+# '   signature_fractions <-
+# '     signature_fractions[,!c("N", "signature_fraction_threshold"), with = F]
+# '
+# '   setkey(signature_fractions, SAMPLE_ID)
+# '
+# '   setnames(signature_fractions,
+# '            names(signature_fractions),
+# '            gsub("\\(|\\)|\\?", "", names(signature_fractions)))
+# '   setnames(signature_fractions,
+# '            names(signature_fractions),
+# '            gsub("\\/|\\ ", ".", names(signature_fractions)))
+# '
+# '   col_names <- names(signature_fractions)
+# '   col_names <- col_names[-1]
+# '
+# '   setcolorder(signature_fractions, c("SAMPLE_ID", col_names))
+# '
+# '   signatures = c(
+# '       "Signature.1.age",
+# '       "Signature.2.APOBEC",
+# '       "Signature.3.BRCA1.2",
+# '       "Signature.4.smoking",
+# '       "Signature.5",
+# '       "Signature.6.DNA.mismatch.repair",
+# '       "Signature.7.ultraviolet.light",
+# '       "Signature.8",
+# '       "Signature.9.POLH",
+# '       "Signature.10.POLE",
+# '       "Signature.11.temozolomide",
+# '       "Signature.12",
+# '       "Signature.13.APOBEC",
+# '       "Signature.14",
+# '       "Signature.15.DNA.mismatch.repair",
+# '       "Signature.16",
+# '       "Signature.17",
+# '       "Signature.18",
+# '       "Signature.19",
+# '       "Signature.20.DNA.mismatch.repair",
+# '       "Signature.21",
+# '       "Signature.22.aristolochic.acid",
+# '       "Signature.23",
+# '       "Signature.24.aflatoxin",
+# '       "Signature.25",
+# '       "Signature.26",
+# '       "Signature.27",
+# '       "Signature.28",
+# '       "Signature.29.tobacco.chewing",
+# '       "Signature.30"
+# '     )
+# '
+# '   absent_signatures <- setdiff(signatures,
+# '                                colnames(signature_fractions))
+# '
+# '   suppressWarnings(signature_fractions[, absent_signatures := 0, with =
+# '                                          F])
+# '
+# '   setcolorder(signature_fractions, c("SAMPLE_ID", signatures))
+# '
+# '   return(signature_fractions)
+# '
+# ' }
 
 
 #' @name mutation_count
@@ -1644,22 +1635,22 @@ fusions = function(SV = SV){
 #'
 #' Mutation count
 #'
-#' @param maf
+#' @param maf MAF format file
 #'
 #' @return table of mutation counts in the 341 IMPACT gene panel
 #'
 #' @export
-mutation_count = function( maf = maf ) {
+mutation_count <- function(maf) {
 
-  maf <- as.data.table(maf)
+  maf1 <- data.table::as.data.table(maf)
 
-  if("Tumor_Sample_Barcode" %in% names(maf)){
-      setnames(maf, "Tumor_Sample_Barcode", "SAMPLE_ID")
+  if("Tumor_Sample_Barcode" %in% names(maf1)){
+      setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
     }
 
-  setkey(maf, "SAMPLE_ID")
+  setkey(maf1, "SAMPLE_ID")
 
-  mutations <- maf[ (Consequence %in% MolecularDiagnosis::Nonsyn_Consequence |
+  mutations <- maf1[ (Consequence %in% MolecularDiagnosis::Nonsyn_Consequence |
                        (Consequence=="upstream_gene_variant" &
                           Hugo_Symbol=="TERT")) &
                       Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341 ]
@@ -1669,10 +1660,7 @@ mutation_count = function( maf = maf ) {
   setnames(mutations_c, 2, "Mutation_Count")
 
   return(mutations_c)
-
 }
-
-
 
 #' @name cn_burden
 #' @title something
@@ -1686,7 +1674,7 @@ mutation_count = function( maf = maf ) {
 #' @return copy number burden of samples from selected cancer types
 #'
 #' @export
-cn_burden = function(seg = seg, log_ratio_threshold = 0.2){
+cn_burden <- function(seg = seg, log_ratio_threshold = 0.2){
 
   seg <- as.data.table(seg)
 
@@ -1713,4 +1701,3 @@ cn_burden = function(seg = seg, log_ratio_threshold = 0.2){
   return(cn_burden)
 
 }
-

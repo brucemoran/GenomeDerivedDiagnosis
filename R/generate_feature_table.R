@@ -1,10 +1,10 @@
 .generate_feature_table <- function(repository_folder){
 
   data_clinical_sample <- fread(
-    file.path(repository_folder, "data_clinical_sample.txt"),
+    file.path(repository_folder, "extdata/data_clinical_sample.txt"),
     skip = 4)
   data_clinical_patient <- fread(
-    file.path(repository_folder, "data_clinical_patient.txt"),
+    file.path(repository_folder, "extdata/data_clinical_patient.txt"),
     skip = 4)
   data_clinical_sample <- merge(
     data_clinical_sample,
@@ -15,13 +15,12 @@
   ### get supplementary info
   supplement_file_tmp <- tempfile()
   download.file(
-    "https://media.nature.com/original/nature-assets/nm/journal/v23/n6/extref/nm.4333-S2.xlsx",
+    "https://static-content.springer.com/esm/art%3A10.1038%2Fnm.4333/MediaObjects/41591_2017_BFnm4333_MOESM22_ESM.xlsx",
     destfile = supplement_file_tmp,
     quiet = TRUE
   )
   data_clinical_sample_extra <- as.data.table(readxl::read_xlsx(supplement_file_tmp, sheet = 1, skip = 3))
   file.remove(supplement_file_tmp)
-
 
   data_clinical_sample <- merge(
     data_clinical_sample,
@@ -32,20 +31,6 @@
     by = "SAMPLE_ID",
     all.x = T
   )
-
-  # cancer_type_key <- file.path(code_dir, "tumor_types.txt")
-  # # if(cancer_type_key == "none"){
-  # #   input_cancertypes <- NULL
-  # # } else {
-  # input_cancertypes <- suppressWarnings(fread(cancer_type_key))
-  # input_cancertypes <- input_cancertypes[, .(CANCER_TYPE,
-  #                                            CANCER_TYPE_DETAILED,
-  #                                            Cancer_Type)]
-  # input_cancertypes <- input_cancertypes[Cancer_Type != ""]
-  # input_cancertypes <- input_cancertypes[!is.na(Cancer_Type)]
-  # input_cancertypes[, Cancer_Type := make.names(Cancer_Type)]
-  # # }
-  # # setnames(input_cancertypes, "Cancer_Type", "iCancer_Type")
 
   feature_table <- merge(
     data_clinical_sample,
@@ -71,8 +56,11 @@
     Gender_F
   )]
 
-  sigs <- fread(file.path(repository_folder, "msk_impact_2017_data_mutations_uniprot.30sigs.txt"))
-  sigsm <- melt.data.table(sigs, id.vars = c("Sample Name", "Number of Mutations"))
+  ##unzip msk_impact_2017.zip data
+  system(paste0("unzip ", file.path(repository_folder, "example_data/msk_impact_2017.zip")))
+  sigs <- fread(file.path(repository_folder, "example_data/msk_impact_2017/msk_impact_2017_data_mutations_uniprot.30sigs.txt"))
+  colnames(sigs)[1] <- "SAMPLE_ID"
+  sigsm <- data.table::melt.data.table(sigs, id.vars = c("SAMPLE_ID", "Number of Mutations"))
 
   sig_names <- c(
     "Signature.1" = "Age",
@@ -113,7 +101,7 @@
   # sigsm[, variable := as.character(variable)]
   sigs <- dcast.data.table(
     sigsm,
-    `Sample Name` ~ sig_name,
+    `SAMPLE_ID` ~ sig_name,
     value.var = "value",
     fill = 0,
     fun.aggregate = function(x)
@@ -121,32 +109,16 @@
   )
   setnames(sigs, c("SAMPLE_ID", paste0("Sig_", names(sigs)[-1])))
 
+  cn <- readRDS(file.path(repository_folder, "extdata/data_CNA.rds"))
+  SV <- readRDS(file.path(repository_folder, "extdata/data_fusions.rds"))
+  maf <- readRDS(file.path(repository_folder,"extdata/data_mutations_uniprot.rds"))
 
-
-  input_seg <- "msk_impact_2017_data_cna_hg19.seg"
-  seg <- suppressWarnings(fread(showProgress = F, file.path(repository_folder, input_seg)))
-  # }
-
-  # if(include_focal_cn_portal == TRUE) {
-  input_cn <- "data_CNA.txt"
-  cn <- suppressWarnings(fread(showProgress = F, file.path(repository_folder, input_cn)))
-
-  input_SV <- "data_fusions.txt"
-  SV <- suppressWarnings(fread(showProgress = F, file.path(repository_folder, input_SV)))
-
-  maf <- suppressWarnings(
-    fread(
-      showProgress = F,
-      file.path(repository_folder,
-                "data_mutations_uniprot.txt")
-    )
-  )
 
   ## purity
   maf[, t_depth := t_alt_count + t_ref_count]
   maf[, t_var_freq := t_alt_count / t_depth]
   max_vaf <- maf[, .(max_vaf = max(t_var_freq)), keyby = .(SAMPLE_ID = Tumor_Sample_Barcode)]
-  max_logr <- seg[, .(max_logr = max(abs(seg.mean[num.mark >= 100]))), keyby = .(SAMPLE_ID = ID)]
+  max_logr <- seg[, .(max_logr = max(abs(seg.mean[num.mark >= 100]))), keyby = .(SAMPLE_ID = SAMPLE_ID)]
   purity_est <- merge(max_vaf, max_logr, all = T)
   feature_table <- merge(feature_table, purity_est, by = "SAMPLE_ID", all.x = T)
   feature_table[is.na(max_logr) | is.infinite(max_logr), max_logr := 0]
@@ -191,7 +163,7 @@
   #if(include_hotspots == TRUE)
   feature_table <- merge(all.x = TRUE, by="SAMPLE_ID", feature_table, as.data.table(hotspots(maf = maf)))
   #if(include_focal_cn_portal == TRUE)
-  feature_table <- merge(all.x = TRUE, by="SAMPLE_ID", feature_table, as.data.table(focal_cn_portal(cn = cn)))
+  feature_table <- merge(all.x = TRUE, by="SAMPLE_ID", feature_table, as.data.table(focal_cn_portal(cna = cn)))
   #if(include_broad_cn == TRUE)
   feature_table <- merge(all.x = TRUE, by="SAMPLE_ID", feature_table, as.data.table(broad_cn(seg = seg)))
   #if(include_mutational_signatures == TRUE)
@@ -238,8 +210,10 @@ generate_feature_table <- function(arg_line = NA){
     raw_args <- commandArgs(TRUE)
   }
 
-  repository_folder <- raw_args[[1]]; raw_args <- raw_args[-1]
-  feature_table_filename <- raw_args[[1]]; raw_args <- raw_args[-1]
+  repository_folder <- raw_args[[1]]
+  raw_args <- raw_args[-1]
+  feature_table_filename <- raw_args[[1]]
+  raw_args <- raw_args[-1]
 
   feature_table <- .generate_feature_table(repository_folder = repository_folder)
   write.tab(feature_table, feature_table_filename)

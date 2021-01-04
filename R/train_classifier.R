@@ -8,7 +8,8 @@
   processes = 6,
   sizes = c(500, 600, 700, 800, 900, 1000),
   N_resamples_train = 5,
-  N_resamples_rfe = 5
+  N_resamples_rfe = 5,
+  parallel = FALSE
 ){
 
   ## https://stats.stackexchange.com/questions/214387/results-from-rfe-function-caret-to-compute-average-metrics-r/310895
@@ -42,12 +43,16 @@
   rownames(x) <- feature_table$Tumor_Sample_Barcode
   rownames(x) <- make.names(rownames(x))
 
-  caret_processes = processes
-  cl <- parallel::makeCluster(caret_processes)
-  doParallel::registerDoParallel(cl)
+  caret_processes = 1
+  if(parallel != FALSE){
+    caret_processes <- processes
+    cl <- parallel::makeCluster(caret_processes)
+    doParallel::registerDoParallel(cl)
+  }
 
   set.seed(seed = seed)
-  N_seeds <- length(y) * 10000 ### number of possible seeds much larger than the
+  ### number of possible seeds much larger than this
+  N_seeds <- length(y) * 10000
   N_sizes <- length(sizes) + 1
   seeds <- replicate(simplify = F,
                      N_resamples_rfe,
@@ -80,7 +85,9 @@
     )
   )
 
-  parallel::stopCluster(cl)
+  if(parallel != FALSE){
+    parallel::stopCluster(cl)
+  }
 
   rfe_model
 }
