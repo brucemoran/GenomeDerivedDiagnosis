@@ -57,8 +57,9 @@
   )]
 
   ##unzip msk_impact_2017.zip data
-  system(paste0("unzip ", file.path(repository_folder, "example_data/msk_impact_2017.zip")))
-  sigs <- fread("msk_impact_2017/msk_impact_2017_data_mutations_uniprot.30sigs.txt")
+  catcht <- utils::unzip(file.path(repository_folder, "example_data/msk_impact_2017.zip"),
+               file = "msk_impact_2017/msk_impact_2017_data_mutations_uniprot.30sigs.txt")
+  sigs <- data.table::fread(catcht)
   colnames(sigs)[1] <- "SAMPLE_ID"
   sigsm <- data.table::melt.data.table(sigs, id.vars = c("SAMPLE_ID", "Number of Mutations"))
 
