@@ -4,8 +4,7 @@ Version: 1.2.0
 Authors@R: c(
     person("Youyun", "Zheng", email = "zhengy1@mskcc.org", role = "aut"),
     person("Niedzica", "Camacho", email = "camachon@mskcc.org", role = "aut"),
-    person("Alex", "Penson", email = "pensona@mskcc.org", role = c("aut", "cre"))
-    )
+    person("Alex", "Penson", email = "pensona@mskcc.org", role = c("aut", "cre")),
     person("Bruce", "Moran", email = "bruce01campus@gmail.com", role = c("aut"))
     )
 Description: This package applies machine learning to mutations and copy number from the MSK Clinical Series and public data (TCGA/ICGC) in order to help identify the cancer subtype of new cases.
