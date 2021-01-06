@@ -1,7 +1,31 @@
-.train_classifier = function(
+#' @import data.table
+#' @import caret
+#' @import randomForest
+#' @import glmnet
+#' @import parallel
+#'
+#' @name train_classifier
+#' @title train_classifier
+#' @description
+#'
+#' @param feature_table ft
+#' @param tuneGrid tunegrid
+#' @param model_function_list model list (rfcal function)
+#' @param verbose verbose
+#' @param seed seed
+#' @param ntree ntree
+#' @param processes processes
+#' @param sizes sizes
+#' @param N_resamples_train N_resamples_train
+#' @param N_resamples_rfe N_resamples_rfe
+#' @param parallel parallel
+#'
+#' @export
+
+train_class <- function(
   feature_table,
   tuneGrid,
-  model_function_list = MolecularDiagnosis::rfcal,
+  model_function_list = rfcal,
   verbose = FALSE,
   seed = 100,
   ntree = 2000,
@@ -13,8 +37,8 @@
 ){
 
   ## https://stats.stackexchange.com/questions/214387/results-from-rfe-function-caret-to-compute-average-metrics-r/310895
-  rfcalFuncs = caret::caretFuncs
-  rfcalFuncs$summary = GDDmetrics
+  rfcalFuncs <- caret::caretFuncs
+  rfcalFuncs$summary <- GDDmetrics
   rfcalFuncs$fit <- function (x, y, first, last, ...) train(x, y, metric = "Kappa", ...)
   rfcalFuncs$rank = function (object, x, y){
     vimp <- varImp(object, scale = FALSE)$importance
@@ -164,10 +188,10 @@ train_classifier <- function(arg_line = NA){
     processes = 6
   }
   rfe_model <-
-    .train_classifier(
+    train_class(
       feature_table,
       tuneGrid,
-      model_function_list = MolecularDiagnosis::rfcal,
+      model_function_list = rfcal,
       ntree = ntree,
       sizes = sizes,
       N_resamples_train = N_resamples_train,
