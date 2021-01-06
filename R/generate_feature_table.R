@@ -129,7 +129,7 @@ gen_feature_table <- function(repository_folder){
   max_logr <- seg[, .(max_logr = max(abs(seg.mean[num.mark >= 100]))), keyby = .(SAMPLE_ID = ID)]
   purity_est <- merge(max_vaf, max_logr, all = T)
   feature_table <- merge(feature_table, purity_est, by = "SAMPLE_ID", all.x = T)
-  
+
   feature_table[is.na(max_logr) | is.infinite(max_logr), max_logr := 0]
   feature_table[is.na(max_vaf), max_vaf := 0]
   feature_table[max_vaf < 0.1 & max_logr < 0.2, Classification_Category := "low_purity"]
