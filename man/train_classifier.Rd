@@ -2,25 +2,54 @@
 % Please edit documentation in R/train_classifier.R
 \name{train_classifier}
 \alias{train_classifier}
+\alias{train_class}
 \title{train_classifier}
 \usage{
+train_class(
+  feature_table,
+  tuneGrid,
+  model_function_list = rfcal,
+  verbose = FALSE,
+  seed = 100,
+  ntree = 2000,
+  processes = 6,
+  sizes = c(500, 600, 700, 800, 900, 1000),
+  N_resamples_train = 5,
+  N_resamples_rfe = 5,
+  parallel = FALSE
+)
+
 train_classifier(arg_line = NA)
 }
 \arguments{
 \item{feature_table}{ft}
 
-\item{model}{model}
-
 \item{tuneGrid}{tunegrid}
 
-\item{tuneGrid_iter}{iterations}
+\item{model_function_list}{model list (rfcal function)}
 
 \item{verbose}{verbose}
 
 \item{seed}{seed}
 
+\item{ntree}{ntree}
+
 \item{processes}{processes}
+
+\item{sizes}{sizes}
+
+\item{N_resamples_train}{N_resamples_train}
+
+\item{N_resamples_rfe}{N_resamples_rfe}
+
+\item{parallel}{parallel}
+
+\item{model}{model}
+
+\item{tuneGrid_iter}{iterations}
 }
 \description{
+
+
 
 }
