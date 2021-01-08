@@ -4,7 +4,8 @@
 #' @param lev input leve
 #' @param model input model
 #'
-#' @return
+#' @return stats
+#' @export
 GDDmetrics <- function (data, lev = NULL, model = NULL){
   if (!all(levels(data[, "pred"]) == levels(data[, "obs"])))
     stop("levels of observed and predicted data do not match")

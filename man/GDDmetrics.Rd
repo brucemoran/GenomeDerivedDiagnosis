@@ -14,7 +14,7 @@ GDDmetrics(data, lev = NULL, model = NULL)
 \item{model}{input model}
 }
 \value{
-
+stats
 }
 \description{
 GDD metrics
