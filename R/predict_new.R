@@ -310,7 +310,7 @@ predict_new <- function(arg_line = NA){
   pred <- predict_new(
     rfe_model = rfe_model,
     feature_table = feature_table,
-    model_function_list = MolecularDiagnosis::rfcal,
+    model_function_list = rfcal,
     N_top_cancer_types = 3,
     all_cancer_types = TRUE,
     N_top_variables = 10,
