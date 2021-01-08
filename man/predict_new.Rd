@@ -2,36 +2,16 @@
 % Please edit documentation in R/predict_new.R
 \name{predict_new}
 \alias{predict_new}
-\title{predict_new}
+\title{Predict new samples}
 \usage{
-predict_new(arg_line = NA)
-
 predict_new(arg_line = NA)
 }
 \arguments{
 \item{arg_line}{}
-
-\item{rfe_model}{train_class}
-
-\item{feature_table}{gen_fature_table}
-
-\item{model_function_list}{rfcal}
-
-\item{N_top_cancer_types}{3}
-
-\item{all_cancer_types}{NULL}
-
-\item{N_top_variables}{10}
-
-\item{all_variables}{FALSE}
 }
 \value{
 
-
-
 }
 \description{
-predict_new
-
 Predict new samples
 }

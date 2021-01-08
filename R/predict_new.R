@@ -123,7 +123,7 @@ get_xval_predictions <- function(rfe_model, N_top_cancer_types = 3){
   pred_train
 }
 
-#' predict_new
+#' pred_new
 #'
 #' @param rfe_model train_class
 #' @param feature_table gen_fature_table
@@ -137,7 +137,7 @@ get_xval_predictions <- function(rfe_model, N_top_cancer_types = 3){
 #' @export
 #' @import rfFC
 
-predict_new <- function(
+pred_new <- function(
   rfe_model,
   feature_table,
   model_function_list,
@@ -307,7 +307,7 @@ predict_new <- function(arg_line = NA){
   rfe_model <- readRDS(model_filename)
   feature_table <- fread(feature_table_filename)
 
-  pred <- predict_new(
+  pred <- pred_new(
     rfe_model = rfe_model,
     feature_table = feature_table,
     model_function_list = rfcal,
