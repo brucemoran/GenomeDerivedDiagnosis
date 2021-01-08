@@ -196,7 +196,8 @@ train_classifier <- function(arg_line = NA){
       sizes = sizes,
       N_resamples_train = N_resamples_train,
       N_resamples_rfe = N_resamples_rfe,
-      processes = processes
+      processes = processes,
+      verbose = TRUE
     )
 
   saveRDS(rfe_model, model_filename)

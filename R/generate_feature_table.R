@@ -39,11 +39,15 @@ gen_feature_table <- function(repository_folder){
     all.x = T
   )
 
+  cancer_type_key <- file.path(repository_folder, "extdata/tumor_types.txt")
+  input_cancertypes <- suppressWarnings(data.table::fread(cancer_type_key))
+  input_cancertypes <- input_cancertypes[, .(CANCER_TYPE,
+                                             CANCER_TYPE_DETAILED,
+                                             Cancer_Type)]
+
   feature_table <- merge(
     data_clinical_sample,
-    MolecularDiagnosis::cancertypes[, .(CANCER_TYPE,
-                                        CANCER_TYPE_DETAILED,
-                                        Cancer_Type)],
+    input_cancertypes,
     by = c("CANCER_TYPE",
            "CANCER_TYPE_DETAILED"),
     all.x = TRUE)

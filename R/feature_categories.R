@@ -31,7 +31,7 @@ mutations <- function(maf){
   setkey(maf1, "SAMPLE_ID")
 
   mutations_d <- data.table::dcast.data.table(
-      maf1[ Consequence %like% paste(collapse = "|", Nonsyn_Consequences) & Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
+      maf1[ Consequence %like% paste(collapse = "|", Nonsyn_Consequences) & Hugo_Symbol %in% GenomeDerivedDiagnosis::msk_impact_341],
       SAMPLE_ID ~ Hugo_Symbol,
       value.var = 'SAMPLE_ID',
       fun.aggregate = function(x) {
@@ -41,7 +41,7 @@ mutations <- function(maf){
 
   mutations_d <- data.table::as.data.table(mutations_d)
 
-  unmutated_impact_genes <- setdiff(MolecularDiagnosis::msk_impact_341, colnames(mutations_d))
+  unmutated_impact_genes <- setdiff(GenomeDerivedDiagnosis::msk_impact_341, colnames(mutations_d))
 
   suppressWarnings(mutations_d[, unmutated_impact_genes := 0, with = F])
 
@@ -50,7 +50,7 @@ mutations <- function(maf){
                                    Hugo_Symbol == "TERT"]$SAMPLE_ID, TERTp := 1]
   mutations_d[!SAMPLE_ID %in% maf1[Consequence == "upstream_gene_variant" &
                                     Hugo_Symbol == "TERT"]$SAMPLE_ID, TERTp := 0]
-  setcolorder(mutations_d, c("SAMPLE_ID", sort(MolecularDiagnosis::msk_impact_341), "TERTp"))
+  setcolorder(mutations_d, c("SAMPLE_ID", sort(GenomeDerivedDiagnosis::msk_impact_341), "TERTp"))
 
   if("Tumor_Sample_Barcode" %in% names(maf1)){
       setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
@@ -85,7 +85,7 @@ truncating_mutations <- function(maf) {
 
     mutations_d <- data.table::dcast.data.table(
       maf1[Consequence %like% paste(collapse = "|", trunc) &
-            Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
+            Hugo_Symbol %in% GenomeDerivedDiagnosis::msk_impact_341],
       SAMPLE_ID ~ paste0(Hugo_Symbol, "_", "TRUNC"),
       value.var = 'SAMPLE_ID',
       fun.aggregate = function(x) {
@@ -99,7 +99,7 @@ truncating_mutations <- function(maf) {
                "Nonsense_Mutation", "Nonstop_Mutation")
 
       mutations_d <- data.table::dcast.data.table(
-          maf1[ Variant_Classification %like% paste(collapse = "|", trunc) & Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341],
+          maf1[ Variant_Classification %like% paste(collapse = "|", trunc) & Hugo_Symbol %in% GenomeDerivedDiagnosis::msk_impact_341],
         SAMPLE_ID ~ paste0(Hugo_Symbol, "_", "TRUNC"),
         value.var = 'SAMPLE_ID',
         fun.aggregate = function(x) {
@@ -111,12 +111,12 @@ truncating_mutations <- function(maf) {
 
   mutations_d <- data.table::as.data.table(mutations_d)
 
-  unmutated_impact_genes <- setdiff(paste0(MolecularDiagnosis::msk_impact_341, "_", "TRUNC"), colnames(mutations_d))
+  unmutated_impact_genes <- setdiff(paste0(GenomeDerivedDiagnosis::msk_impact_341, "_", "TRUNC"), colnames(mutations_d))
 
   suppressWarnings(mutations_d[, unmutated_impact_genes := 0, with = F])
 
   setcolorder(mutations_d, c("SAMPLE_ID", paste0(
-      sort(MolecularDiagnosis::msk_impact_341), "_", "TRUNC"
+      sort(GenomeDerivedDiagnosis::msk_impact_341), "_", "TRUNC"
   )))
 
   if("Tumor_Sample_Barcode" %in% names(maf1)) setnames(maf1, "Tumor_Sample_Barcode", "SAMPLE_ID")
@@ -1005,7 +1005,7 @@ hotspots <- function(maf){
   # suppressWarnings(maf[Variant_Type == "SNP",
   #                      Amino_Acid := as.integer(gsub("/.*$", "", Protein_position))])
   #
-  # maf[paste(Hugo_Symbol, Amino_Acid) %in% MolecularDiagnosis::hotspot.v11.mutations.filtered,
+  # maf[paste(Hugo_Symbol, Amino_Acid) %in% GenomeDerivedDiagnosis::hotspot.v11.mutations.filtered,
   #     hotspot := ]
 
   if("HGVSp_Short" %in% names(maf)) {
@@ -1113,7 +1113,7 @@ focal_cn_portal = function(cna) {
 
   cna[, Hugo_Symbol := gsub("-", ".", Hugo_Symbol)]
 
-  cna <- cna[Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341]
+  cna <- cna[Hugo_Symbol %in% GenomeDerivedDiagnosis::msk_impact_341]
   setkey(cna, Hugo_Symbol)
 
   sample_cols <- 2:ncol(cna)
@@ -1163,7 +1163,7 @@ broad_cn <- function(seg, log_ratio_threshold = 0.2){
   seg[, chr := as.character(chr)]
   setkey(seg, chr, start,  end)
 
-  Cytoband_Table <- MolecularDiagnosis::Cytoband_Table[!chr == "Y"]
+  Cytoband_Table <- GenomeDerivedDiagnosis::Cytoband_Table[!chr == "Y"]
   Cytoband_Table[, Length := (end - start) + 1]
   setkey(Cytoband_Table, chr, start,  end)
 
@@ -1650,10 +1650,10 @@ mutation_count <- function(maf) {
 
   setkey(maf1, "SAMPLE_ID")
 
-  mutations <- maf1[ (Consequence %in% MolecularDiagnosis::Nonsyn_Consequence |
+  mutations <- maf1[ (Consequence %in% GenomeDerivedDiagnosis::Nonsyn_Consequence |
                        (Consequence=="upstream_gene_variant" &
                           Hugo_Symbol=="TERT")) &
-                      Hugo_Symbol %in% MolecularDiagnosis::msk_impact_341 ]
+                      Hugo_Symbol %in% GenomeDerivedDiagnosis::msk_impact_341 ]
 
   mutations_c <- mutations[, .(length(Hugo_Symbol)), by = "SAMPLE_ID" ]
 

@@ -1,3 +1,13 @@
+#' get_fc
+#'
+#' @param rfe_model train_class
+#' @param feature_table gen_fature_table
+#' @param mClass NULL
+#'
+#' @return
+#' @export
+#' @import rfFC
+
 get_fc <- function(rfe_model, feature_table, mClass = NULL){
   rf_object <- rfe_model$fit$finalModel$classifier
   dataT <- as.data.frame(rfe_model$fit$trainingData)
@@ -12,6 +22,17 @@ get_fc <- function(rfe_model, feature_table, mClass = NULL){
   rownames(fc) <- feature_table$SAMPLE_ID
   as.data.table(fc, keep.rownames = "SAMPLE_ID")
 }
+
+#' predict_table
+#'
+#' @param rfe_model train_class
+#' @param feature_table gen_fature_table
+#' @param model_function_list rfcal
+#' @param N_top_cancer_types 3
+#'
+#' @return
+#' @export
+#' @import rfFC
 
 predict_table <- function(
   rfe_model,
@@ -31,7 +52,7 @@ predict_table <- function(
   pred <- cbind(feature_table[, .(SAMPLE_ID, Classification_Category, Cancer_Type)],
                 pred_mat)
   pred[, paste0("Pred", 1:N_top_cancer_types) := as.list(
-    Cancer_Types[head(n=N_top_cancer_types,
+    Cancer_Types[head(n = N_top_cancer_types,
                       order(.SD,
                             decreasing = T))]),
     SAMPLE_ID,
@@ -68,7 +89,17 @@ predict_table <- function(
   pred
 }
 
+#' get_xval_predictions
+#'
+#' @param rfe_model train_class
+#' @param N_top_cancer_types 3
+#'
+#' @return
+#' @export
+#' @import rfFC
+
 get_xval_predictions <- function(rfe_model, N_top_cancer_types = 3){
+
   Cancer_Types <- rfe_model$obsLevels
 
   pred_train <- setDT(rfe_model$fit$pred)
@@ -92,7 +123,21 @@ get_xval_predictions <- function(rfe_model, N_top_cancer_types = 3){
   pred_train
 }
 
-.predict_new <- function(
+#' predict_new
+#'
+#' @param rfe_model train_class
+#' @param feature_table gen_fature_table
+#' @param model_function_list rfcal
+#' @param N_top_cancer_types 3
+#' @param all_cancer_types NULL
+#' @param N_top_variables 10
+#' @param all_variables FALSE
+#'
+#' @return
+#' @export
+#' @import rfFC
+
+predict_new <- function(
   rfe_model,
   feature_table,
   model_function_list,
@@ -262,7 +307,7 @@ predict_new <- function(arg_line = NA){
   rfe_model <- readRDS(model_filename)
   feature_table <- fread(feature_table_filename)
 
-  pred <- .predict_new(
+  pred <- predict_new(
     rfe_model = rfe_model,
     feature_table = feature_table,
     model_function_list = MolecularDiagnosis::rfcal,
